@@ -1,8 +1,8 @@
 # Abs_Fl_DataProcess
  
-Functions for processing absorption and Flourensce time trace signal data of Li or MgF.
+Functions for processing absorption and Fluorenscence time trace signal data of Li or MgF.
 
-## Code Discriptions
+## Code Descriptions
 >### Data processing codes
 >>- #### data2spec.m
 >>	초기 버전의 코드. csv file들을 불러와 주파수별로 처리해준다. 현재는 사용하지 않음.
