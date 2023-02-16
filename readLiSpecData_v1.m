@@ -27,6 +27,7 @@ end
 DataParams = detectImportOptions(name+'0_'+num2str(results.absfreq(1),'%.6f')+".csv");
 Data = readmatrix(name+'0_'+num2str(results.absfreq(1),'%.6f')+".csv",DataParams);
 
+results.dt = (Data(2,1)- Data(1,1))*1e6;
 
 data_num = size(Data,1);
 
@@ -42,7 +43,7 @@ SumFlDatas = zeros(dfsize, iter); % summatino of each iteration of fls time sign
 
 
 
-results.baselinerange = round(96/1.6); % 96 µs에서 ablation 시작 104 µs에서 끝
+results.baselinerange = round(96/results.dt); % 96 µs에서 ablation 시작 104 µs에서 끝
 results.t = (Data(:,1)-Data(results.baselinerange,1))*1e6; % µs, 96 µs을 0초로 설정
 
 bg = results.AbsorptionPower_final__uW_*1e-3;
@@ -76,13 +77,13 @@ switch normmode
     case 'basic'
         
         results.AN = 1-(TotalAbsDatas/mean(TotalAbsDatas(1:results.baselinerange,1,1)));
-        results.FN = TotalFlDatas/mean(TotalFlDatas(7000/1.6:end,1,1))-1;
+        results.FN = TotalFlDatas/mean(TotalFlDatas(7000/results.dt:end,1,1))-1;
         
     case 'powernorm'
         for j = 1 : dfsize
             for i = 1 : iter
                 nn(:,i,j) = 1-(TotalAbsDatas(:,i,j)/mean(TotalAbsDatas(1:results.baselinerange,i,j)));
-                nnn(:,i,j) = (TotalFlDatas(:,i,j)/mean(TotalFlDatas(5000/1.6:end,i,j)))-1;
+                nnn(:,i,j) = (TotalFlDatas(:,i,j)/mean(TotalFlDatas(5000/results.dt:end,i,j)))-1;
             end
         end
         results.AN = nn;
