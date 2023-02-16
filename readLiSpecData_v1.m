@@ -1,6 +1,6 @@
 function results = readLiSpecData_v1(name, freq_i, freq_f, freq_step, iter, normmode, plotmode)
 
-
+% updatelog 2023/02/16 
 
 clf;
 close all;
