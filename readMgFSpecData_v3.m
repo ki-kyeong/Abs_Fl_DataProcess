@@ -1,28 +1,23 @@
 function results = readMgFSpecData_v3(name, freq_i, freq_f, freq_step,...
     rep, iter, normmode, plotmode)
 
-% update log 23/02/14
-% v2에서 repetition data를 읽어오게끔 변경. Mg signal이 작아서 한번에 rep 번의 pulse때려야
-% signal이 나오기 때문.. 현재는 rep번째 pulse의 data만 볼 것임.
-
 clf;
 close all;
 
 results.name = name;
 savename = split(name,'_');
 results.savename = savename(end-1);
-det = freq_i : freq_step : freq_f; % 417.xxxx THz
-results.IRdet = ((det-2093.71)*1e2).'; % MHz, detuning from 24MgF R_1(1) F=2 전이
-% results.IRdet = ((det-1860.055)*1e2).'; % MHz, detuning from 24MgF R_1(0) F=1 전이
+det = freq_i : freq_step*1e-3 : freq_f; % GHz
+results.IRdet = ((det-209.371)*1e3).'; % MHz, detuning from 24MgF R_1(1) F=2 전이
+% results.IRdet = ((det-186.0055)*1e3).'; % MHz, detuning from 24MgF R_1(0) F=1 전이
 results.UVdet = results.IRdet*2;
-results.IRabsfreq = 417+det*1e-4;
+results.IRabsfreq = 417+det*1e-3; % THz
 results.UVabsfreq = results.IRabsfreq*2;
 dfsize = size(det,2);
 results.rep = rep;
 
 opt = detectImportOptions(name+"parameter.csv");
 expPara = readmatrix(name+"parameter.csv",opt);
-
 
 for i = 1 : size(opt.VariableNames,2)
     results.(opt.VariableNames{i}) = expPara(i);
@@ -32,7 +27,6 @@ DataParams = detectImportOptions(name+'0_'+num2str(results.IRabsfreq(1),'%.6f')+
 Data = readmatrix(name+'0_'+num2str(results.IRabsfreq(1),'%.6f')+".csv",DataParams);
 
 results.dt = (Data(2,1)-Data(1,1))*1e6; % µs unit
-
 
 data_num = size(Data,1);
 
@@ -51,7 +45,6 @@ results.t = (Data(:,1)-Data(results.baselinerange,1))*1e6; % µs, 96 µs을 0초
 
 bg = results.AbsorptionBackgroundVoltage_mV_ *1e-3;
 bg2 = results.AbsorptionSamplingBackgroundVoltage_mV_*1e-3;
-% bg = 0*1e-3;
 
 wb = waitbar(0, ' Getting started');
 
@@ -64,15 +57,13 @@ for j = 1 : dfsize
         'WindowStyle','modal');
 
     for i = 1:iter
-        %         i
         Data = readmatrix(name+string(i-1)+"_"+num2str(f,'%.6f')+".csv",DataParams);
-
-        % Data = readmatrix(name+string(i-1)+"_"+num2str(f,'%.2f')+".csv");
         TotalAbsDatas(:,i,j) = Data(:,2*rep)-bg;
         TotalAbsSampledDatas(:,i,j) = Data(:,2*rep+4*rep)-bg2;
         %         TotalFlDatas(:,i,j) = Data(:,2*rep+2*rep);
     end
 end
+
 close(wb)
 
 results.AT = TotalAbsDatas;
@@ -81,7 +72,6 @@ results.ATsampled = TotalAbsSampledDatas;
 
 switch normmode
     case 'basic'
-
         results.AN = 1-(TotalAbsDatas/mean(TotalAbsDatas(1:results.baselinerange,1,1)));
         %         results.FN = TotalFlDatas/mean(TotalFlDatas(7000/1.6:end,1,1))-1;
 
@@ -90,10 +80,10 @@ switch normmode
             for i = 1 : iter
                 nn(:,i,j) = 1-(TotalAbsDatas(:,i,j)/mean(TotalAbsDatas(1:results.baselinerange,i,j)));
                 nnsp(:,i,j) = 1-(TotalAbsSampledDatas(:,i,j)/mean(TotalAbsSampledDatas(1:results.baselinerange,i,j)));
-
                 %                 nnn(:,i,j) = (TotalFlDatas(:,i,j)/mean(TotalFlDatas(5000/1.6:end,i,j)))-1;
             end
         end
+
         results.ANorig = nn;
         results.ANbg = nnsp;
         results.AN = nn-nnsp;
@@ -102,6 +92,7 @@ switch normmode
 
     otherwise
         error('try basic of powernorm')
+
 end
 
 
@@ -113,7 +104,6 @@ end
 
 results.AS = SumAbsDatas;
 % results.FS = SumFlDatas;
-
 
 results.AM = mean(SumAbsDatas,2);
 results.ASte = std(SumAbsDatas,0,2)/sqrt(iter);
@@ -134,8 +124,8 @@ results.IRdf= 0;
 results.UVdf = results.IRdf*2;
 results.IRDet = results.IRdet-results.IRdf;
 results.UVDet = results.UVdet-results.UVdf;
-results.IRAbsfreq = 417.20937+results.IRDet*1e-4; % R_1(1) F=2 전이
-% results.IRAbsfreq = 417.186005+results.IRDet*1e-4; % R_1(0) F=1 전이
+results.IRAbsfreq = 417.20937+results.IRDet*1e-6; % R_1(1) F=2 전이
+% results.IRAbsfreq = 417.186005+results.IRDet*1e-6; % R_1(0) F=1 전이
 results.UVAbsfreq = results.IRAbsfreq*2;
 
 % results.v = -results.Det/(446809870)*299792458/cos(pi/4); % for XY beam

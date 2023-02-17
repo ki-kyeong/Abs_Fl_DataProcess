@@ -1,17 +1,13 @@
 function results = readMgFSpecData_v3(name, freq_i, freq_f, freq_step,...
     rep, iter, normmode, plotmode)
 
-% update log 23/02/14
-% v2에서 repetition data를 읽어오게끔 변경. Mg signal이 작아서 한번에 rep 번의 pulse때려야
-% signal이 나오기 때문.. 현재는 rep번째 pulse의 data만 볼 것임.
-
 clf;
 close all;
 
 results.name = name;
 savename = split(name,'_');
 results.savename = savename(end-1);
-det = freq_i : freq_step : freq_f; % 417.xxxx THz
+det = freq_i : freq_step*1e-3 : freq_f; % GHz
 results.IRdet = ((det-2093.71)*1e2).'; % MHz, detuning from 24MgF R_1(1) F=2 전이
 % results.IRdet = ((det-1860.055)*1e2).'; % MHz, detuning from 24MgF R_1(0) F=1 전이
 results.UVdet = results.IRdet*2;
@@ -108,7 +104,7 @@ end
 
 for j = 1 : dfsize
     SumAbsDatas(j,:) = sum(results.AN(results.baselinerange+round(80/results.dt):end,:,j)); % ablation 이후 80 µs 부터
-    %     SumFlDatas(j,:) = sum(results.FN(results.baselinerange+4:end,:,j));
+%     SumFlDatas(j,:) = sum(results.FN(results.baselinerange+4:end,:,j));
 end
 
 results.AS = SumAbsDatas;
