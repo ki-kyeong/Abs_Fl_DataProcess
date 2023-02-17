@@ -108,7 +108,7 @@ end
 
 for j = 1 : dfsize
     SumAbsDatas(j,:) = sum(results.AN(results.baselinerange+round(80/results.dt):end,:,j)); % ablation 이후 80 µs 부터
-%     SumFlDatas(j,:) = sum(results.FN(results.baselinerange+4:end,:,j));
+    %     SumFlDatas(j,:) = sum(results.FN(results.baselinerange+4:end,:,j));
 end
 
 results.AS = SumAbsDatas;
