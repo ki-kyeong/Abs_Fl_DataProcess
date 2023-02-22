@@ -6,6 +6,7 @@ close all;
 
 results.name = name;
 savename = split(name,'_');
+results.readme=readlines("./data/"+savename(end-1)+"_readme.txt");
 results.savename = savename(end-1);
 det = freq_i : freq_step*1e-3 : freq_f; % GHz
 results.IRdet = ((det-209.371)*1e3).'; % MHz, detuning from 24MgF R_1(1) F=2 전이
@@ -30,10 +31,10 @@ results.dt = (Data(2,1)-Data(1,1))*1e6; % µs unit
 
 data_num = size(Data,1);
 
-TotalAbsDatas = zeros(data_num, iter, dfsize); % abs time signal row data - bacground
-TotalAbsSampledDatas = zeros(data_num, iter, dfsize); % abs time signal row data - bacground
+TotalAbsDatas = zeros(data_num, rep, iter, dfsize); % abs time signal row data - bacground
+TotalAbsPFMDatas = zeros(data_num, rep, iter, dfsize); % abs time signal row data - bacground
 % NormAbsDatas = zeros(size(TotalAbsDatas)); % abs time signal normalized with max val after ablation
-SumAbsDatas = zeros(dfsize,iter);% summation of each iteration of normalized abs time signal
+SumAbsDatas = zeros(dfsize,rep, iter);% summation of each iteration of normalized abs time signal
 
 % TotalFlDatas = zeros(data_num, iter, dfsize); % fls time signal row data
 % % NormFlDatas = zeros(size(TotalFlDatas)); % normalized with first fls data
@@ -42,9 +43,6 @@ SumAbsDatas = zeros(dfsize,iter);% summation of each iteration of normalized abs
 
 results.baselinerange = round(96/results.dt); % 96 µs에서 ablation 시작 104 µs에서 끝
 results.t = (Data(:,1)-Data(results.baselinerange,1))*1e6; % µs, 96 µs을 0초로 설정
-
-bg = results.AbsorptionBackgroundVoltage_mV_ *1e-3;
-bg2 = results.AbsorptionSamplingBackgroundVoltage_mV_*1e-3;
 
 wb = waitbar(0, ' Getting started');
 
@@ -58,16 +56,16 @@ for j = 1 : dfsize
 
     for i = 1:iter
         Data = readmatrix(name+string(i-1)+"_"+num2str(f,'%.6f')+".csv",DataParams);
-        TotalAbsDatas(:,i,j) = Data(:,2*rep)-bg;
-        TotalAbsSampledDatas(:,i,j) = Data(:,2*rep+4*rep)-bg2;
-        %         TotalFlDatas(:,i,j) = Data(:,2*rep+2*rep);
+        TotalAbsDatas(:,1:rep,i,j) = Data(:,2:2:2*rep)-results.AbsorptionBackgroundVoltage_mV_ *1e-3;
+        TotalAbsPFMDatas(:,1:rep,i,j) = Data(:,2*(2*rep+1):2:2*(3*rep))-results.AbsorptionSamplingBackgroundVoltage_mV_*1e-3;
+        %         TotalFlDatas(:,i,j) = Data(:,2*(rep+1):2:2*(2*rep));
     end
 end
 
 close(wb)
 
 results.AT = TotalAbsDatas;
-results.ATsampled = TotalAbsSampledDatas;
+results.ATPFM = TotalAbsPFMDatas;
 % results.FT = TotalFlDatas;
 
 switch normmode
@@ -78,8 +76,9 @@ switch normmode
     case 'powernorm'
         for j = 1 : dfsize
             for i = 1 : iter
-                nn(:,i,j) = 1-(TotalAbsDatas(:,i,j)/mean(TotalAbsDatas(1:results.baselinerange,i,j)));
-                nnsp(:,i,j) = 1-(TotalAbsSampledDatas(:,i,j)/mean(TotalAbsSampledDatas(1:results.baselinerange,i,j)));
+                for k = 1 : rep
+                nn(:,k,i,j) = 1-(TotalAbsDatas(:,k,i,j)/mean(TotalAbsDatas(1:results.baselinerange,k,i,j)));
+                nnsp(:,k,i,j) = 1-(TotalAbsPFMDatas(:,k,i,j)/mean(TotalAbsPFMDatas(1:results.baselinerange,k,i,j)));
                 %                 nnn(:,i,j) = (TotalFlDatas(:,i,j)/mean(TotalFlDatas(5000/1.6:end,i,j)))-1;
             end
         end
@@ -89,7 +88,7 @@ switch normmode
         results.AN = nn-nnsp;
         % results.AN = nn;
         % results.FN = nnn;
-
+        end
     otherwise
         error('try basic of powernorm')
 
@@ -98,15 +97,15 @@ end
 
 
 for j = 1 : dfsize
-    SumAbsDatas(j,:) = sum(results.AN(results.baselinerange+round(80/results.dt):end,:,j)); % ablation 이후 80 µs 부터
-%     SumFlDatas(j,:) = sum(results.FN(results.baselinerange+4:end,:,j));
+    SumAbsDatas(j,:,:) = sum(results.AN(results.baselinerange+round(80/results.dt):end,:,:,j)); % ablation 이후 80 µs 부터
+%     SumFlDatas(j,:,:) = sum(results.FN(results.baselinerange+4:end,:,:,j));
 end
 
 results.AS = SumAbsDatas;
 % results.FS = SumFlDatas;
 
-results.AM = mean(SumAbsDatas,2);
-results.ASte = std(SumAbsDatas,0,2)/sqrt(iter);
+results.AM = mean(SumAbsDatas(:,rep,:),3); % 각 rep의 마지막 데이터들만 취합
+results.ASte = std(SumAbsDatas(:,rep,:),0,3)/sqrt(iter);
 % results.FM = mean(SumFlDatas,2);
 % results.FSte = std(SumFlDatas,0,2)/sqrt(iter);
 
