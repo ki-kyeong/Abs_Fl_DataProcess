@@ -9,8 +9,9 @@ savename = split(name,'_');
 results.readme=readlines("./data/"+savename(end-1)+"_readme.txt");
 results.savename = savename(end-1);
 det = freq_i : freq_step*1e-3 : freq_f; % GHz
-results.IRdet = ((det-209.371)*1e3).'; % MHz, detuning from 24MgF R_1(1) F=2 전이
+% results.IRdet = ((det-209.371)*1e3).'; % MHz, detuning from 24MgF R_1(1) F=2 전이
 % results.IRdet = ((det-186.0055)*1e3).'; % MHz, detuning from 24MgF R_1(0) F=1 전이
+results.IRdet = ((det-147.178)*1e3).'; % MHz, detuning from 24MgF R_1(1) F=2 전이
 results.UVdet = results.IRdet*2;
 results.IRabsfreq = 417+det*1e-3; % THz
 results.UVabsfreq = results.IRabsfreq*2;
@@ -123,7 +124,8 @@ results.IRdf= 0;
 results.UVdf = results.IRdf*2;
 results.IRDet = results.IRdet-results.IRdf;
 results.UVDet = results.UVdet-results.UVdf;
-results.IRAbsfreq = 417.20937+results.IRDet*1e-6; % R_1(1) F=2 전이
+results.IRAbsfreq = 417.147178+results.IRDet*1e-6; % R_1(1) F=2 전이
+% results.IRAbsfreq = 417.20937+results.IRDet*1e-6; % R_1(1) F=2 전이
 % results.IRAbsfreq = 417.186005+results.IRDet*1e-6; % R_1(0) F=1 전이
 results.UVAbsfreq = results.IRAbsfreq*2;
 
