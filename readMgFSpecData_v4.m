@@ -9,18 +9,29 @@ results.readme=readlines("./data/"+savename(end-1)+"_readme.txt");
 results.savename = savename(end-1);
 
 for i = 1 : iter
-results.wavemeter_data{:,i} = readmatrix(name+string(iter-1)+"_wavemeter_data.csv"); 
+results.wavemeter_data{:,i} = readmatrix(name+string(i-1)+"_wavemeter_data.csv"); 
 end
 
-det = (results.wavemeter_data{:,1}(:,1)-417)*1e3;
+results.IRcavityfreq = results.wavemeter_data{:,1}(:,1); % THz
+results.IRcavitydet = (results.IRcavityfreq-417.147178)*1e6; % MHz
+results.UVcavityfreq = 2*results.IRcavityfreq;
+results.UVcavitydet = 2*results.IRcavitydet;
 
-% results.IRdet = ((det-209.371)*1e3).'; % MHz, detuning from 24MgF R_1(1) F=2 전이
-% results.IRdet = ((det-186.0055)*1e3).'; % MHz, detuning from 24MgF R_1(0) F=1 전이
-results.IRdet = ((det-147.178)*1e3).'; % MHz, detuning from 24MgF P_1(1) F=2 전이
-results.UVdet = results.IRdet*2;
-results.IRabsfreq = results.wavemeter_data{:,1}(:,1); % THz
-results.UVabsfreq = results.IRabsfreq*2;
-dfsize = size(det,1);
+dfsize = size(results.IRcavityfreq,1);
+
+results.IRrealfreq = zeros(dfsize,iter);
+for i = 1: iter
+results.IRrealfreq(:,i) = results.wavemeter_data{i}(:,2);
+end
+
+results.IRrealdet = (results.IRrealfreq-417.147178)*1e6; % MHz
+results.IRrealdetM = mean(results.IRrealdet,2);
+results.IRrealdetSte = std(results.IRrealdet,0,2)/sqrt(iter); 
+results.UVrealfreq = 2*results.IRrealfreq;
+results.UVrealdet = 2*results.IRrealdet;
+results.UVrealdetM = 2*results.IRrealdetM;
+results.UVrealdetSte = 2*results.IRrealdetSte;
+
 
 
 opt = detectImportOptions(name+"parameter.csv");
@@ -30,8 +41,8 @@ for i = 1 : size(opt.VariableNames,2)
     results.(opt.VariableNames{i}) = expPara(i);
 end
 
-DataParams = detectImportOptions(name+'0_'+num2str(results.IRabsfreq(1),'%.6f')+".csv");
-Data = readmatrix(name+'0_'+num2str(results.IRabsfreq(1),'%.6f')+".csv",DataParams);
+DataParams = detectImportOptions(name+'0_'+num2str(results.IRcavityfreq(1),'%.6f')+".csv");
+Data = readmatrix(name+'0_'+num2str(results.IRcavityfreq(1),'%.6f')+".csv",DataParams);
 
 results.dt = (Data(2,1)-Data(1,1))*1e6; % µs unit
 
@@ -50,13 +61,14 @@ SumAbsDatas = zeros(dfsize,rep, iter);% summation of each iteration of normalize
 % SumFlDatas = zeros(dfsize, iter); % summatino of each iteration of fls time signal
 
 
+
 results.baselinerange = round(96/results.dt); % 96 µs에서 ablation 시작 104 µs에서 끝
 results.t = (Data(:,1)-Data(results.baselinerange,1))*1e6; % µs, 96 µs을 0초로 설정
 
 wb = waitbar(0, ' Getting started');
 
 for j = 1 : dfsize
-    f = results.IRabsfreq(j);
+    f = results.IRcavityfreq(j);
 
     waitbar(j/dfsize, wb, results.savename+newline+...
         num2str(f, '%.6f') + " THz"+newline+...
@@ -128,14 +140,14 @@ results.ASte = std(SumAbsDatas(:,rep,:),0,3)/sqrt(iter);
 % results.df= results.det(end);
 % results.Det = results.det-results.df;
 
-results.IRdf= 0;
-results.UVdf = results.IRdf*2;
-results.IRDet = results.IRdet-results.IRdf;
-results.UVDet = results.UVdet-results.UVdf;
-results.IRAbsfreq = 417.147178+results.IRDet*1e-6; % R_1(1) F=2 전이
+% results.IRdf= 0;
+% 
+% results.IRcavityDet = results.IRcavitydet-results.IRdf;
+
+% results.IRcavityfreq = 417.147178+results.IRDet*1e-6; % R_1(1) F=2 전이
 % results.IRAbsfreq = 417.20937+results.IRDet*1e-6; % R_1(1) F=2 전이
 % results.IRAbsfreq = 417.186005+results.IRDet*1e-6; % R_1(0) F=1 전이
-results.UVAbsfreq = results.IRAbsfreq*2;
+% results.UVAbsfreq = results.IRAbsfreq*2;
 
 % results.v = -results.Det/(446809870)*299792458/cos(pi/4); % for XY beam
 % results.v = -results.Det/(446809870)*299792458/cos(pi/4+atan(1.5/10)); % for XYt beam
