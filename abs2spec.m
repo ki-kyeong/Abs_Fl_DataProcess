@@ -1,5 +1,5 @@
 function [det, TotalDatas, NormDatas, SumDatas, MeanDatas, SteDatas] = abs2spec(name, freq_i, freq_f, freq_step, trial)
-
+% haha I got new macbook~
 det = freq_i : freq_step : freq_f;
 
 TotalDatas = cell(size(det));
