@@ -5,8 +5,9 @@ close all;
 
 results.name = name;
 savename = split(name,'_');
-results.readme=readlines("./data/"+savename(end-1)+"_readme.txt");
+results.readme=readlines("./data/"+savename(end-1)+"_readme.txt", Encoding="UTF-8");
 results.savename = savename(end-1);
+results.iter = iter;
 
 for i = 1 : iter
 results.wavemeter_data{:,i} = readmatrix(name+string(i-1)+"_wavemeter_data.csv"); 
@@ -125,8 +126,8 @@ end
 results.AS = SumAbsDatas;
 % results.FS = SumFlDatas;
 
-results.AM = mean(SumAbsDatas(:,1,:),3); % 각 rep의 첫번째 데이터들만 취합
-results.ASte = std(SumAbsDatas(:,rep,:),0,3)/sqrt(iter);
+results.AM = mean(SumAbsDatas(:,:,:),[2 3]); % rep, iter 전부 평균
+results.ASte = std(SumAbsDatas(:,:,:),0,[2 3])/sqrt(iter*rep);
 % results.FM = mean(SumFlDatas,2);
 % results.FSte = std(SumFlDatas,0,2)/sqrt(iter);
 
