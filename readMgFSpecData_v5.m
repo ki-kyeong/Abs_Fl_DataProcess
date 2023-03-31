@@ -63,12 +63,12 @@ TotalAbsPFMDatas = zeros(data_num, results.repititionPerStep, results.iteration,
 SumAbsDatas = zeros(dfsize,results.repititionPerStep, results.iteration);% summation of each results.iteration of normalized abs time signal
 
 TotalFlDatas = zeros(data_num,results.repititionPerStep, results.iteration, dfsize); % fls time signal row data
-% % NormFlDatas = zeros(size(TotalFlDatas)); % normalized with first fls data
+% NormFlDatas = zeros(size(TotalFlDatas)); % normalized with first fls data
 SumFlDatas = zeros(dfsize,results.repititionPerStep, results.iteration); % summatino of each results.iteration of fls time signal
 
 
 
-results.baselinerange = round(98/results.dt); % 98 µs에서 ablation 시작 104 µs에서 끝
+results.baselinerange = round(96/results.dt); % 96 µs에서 ablation 시작 140 µs에서 끝
 results.t = (Data(:,1)-Data(results.baselinerange,1))*1e6; % µs, 98 µs을 0초로 설정
 
 wb = waitbar(0, ' Getting started');
@@ -106,9 +106,9 @@ switch normmode
                 for k = 1 : results.repititionPerStep
                 nn(:,k,i,j) = 1-(TotalAbsDatas(:,k,i,j)/mean(TotalAbsDatas(1:results.baselinerange,k,i,j)));
                 nnsp(:,k,i,j) = 1-(TotalAbsPFMDatas(:,k,i,j)/mean(TotalAbsPFMDatas(1:results.baselinerange,k,i,j)));
-                nnn(:,k, i,j) = (TotalFlDatas(:,k, i,j)/mean(TotalFlDatas(4000/results.dt:end,k,i,j)))-1; % time trace 2D image를 그려보고 8 ms으로 정햇음...
+                % nnn(:,k, i,j) = (TotalFlDatas(:,k, i,j)/mean(TotalFlDatas(results.baselinerange+8000/results.dt:end,k,i,j)))-1; % time trace 2D image를 그려보고 8 ms으로 정햇음...
                 % nnn(:,k, i,j) = (TotalFlDatas(:,k, i,j)/mean(TotalFlDatas(1:results.baselinerange,k,i,j)))-1;
-                % nnn(:,k, i,j) = (TotalFlDatas(:,k, i,j)/mean(TotalFlDatas(2:results.baselinerange,k,i,j)))-1;
+                nnn(:,k, i,j) = (TotalFlDatas(:,k, i,j)/mean(TotalFlDatas(2:results.baselinerange,k,i,j)))-1;
             end
         end
 
@@ -126,10 +126,10 @@ end
 
 
 for j = 1 : dfsize
-    % SumAbsDatas(j,:,:) = sum(results.AN(results.baselinerange+round(80/results.dt):end,:,:,j)); % ablation 이후 80 µs 부터
-    SumAbsDatas(j,:,:) = sum(results.AN(results.baselinerange+round(80/results.dt):results.baselinerange+3000/results.dt,:,:,j)); % ablation 이후 3 ms 까지
+    SumAbsDatas(j,:,:) = sum(results.AN(results.baselinerange+round(80/results.dt):end,:,:,j)); % ablation 이후 80 µs 부터
+    % SumAbsDatas(j,:,:) = sum(results.AN(results.baselinerange+round(80/results.dt):results.baselinerange+3000/results.dt,:,:,j)); % ablation 이후 3 ms 까지
     % SumFlDatas(j,:,:) = sum(results.FN(results.baselinerange+4:end,:,:,j));
-    % SumFlDatas(j,:,:) = sum(results.FN(results.baselinerange+40/results.dt:end,:,:,j)); % ablation이 한 40 µs뒤에 끝남
+    SumFlDatas(j,:,:) = sum(results.FN(results.baselinerange+40/results.dt:end,:,:,j)); % ablation이 한 40 µs뒤에 끝남
     
 end
 
@@ -141,28 +141,25 @@ results.ASte = std(SumAbsDatas,0,[2 3])/sqrt(results.iteration*results.repititio
 results.FM = mean(SumFlDatas,[2 3]);
 results.FSte = std(SumFlDatas,0,[2 3])/sqrt(results.iteration*results.repititionPerStep);
 
-% % abs spectrum fit으로 Det를 정할때
-% results.Det = results.det;
-% results.absfit = GF_Li_v2(results, 'single',1); % abs spectrum gaussian fit
-% results.Det = results.det-results.absfit.b1; % b1 = F=2 detuning
+% abs spectrum fit으로 Det를 정할때
+
+% results.absfit = GF_MgF(results); % abs spectrum gaussian fit
+% results.UVfittedDet = results.UVrealdet -results.absfit.b3; % b3 = F=0 detuning
+
+% results.UVfittedDet = results.UVrealdet +62; % 그냥 적어줄 때
+
+% results.UVfittedDetM = mean(results.UVfittedDet, 2);
+% results.UVfittedDetSte = std(results.UVfittedDet,0,2)/sqrt(results.iteration);
 
 % z fl spectrum 으로 Det를 정할때
 % results.df = results.det(results.FM == max(results.FM));
 % results.df= results.det(end);
 % results.Det = results.det-results.df;
 
-% results.IRdf= 0;
-% 
-% results.IRcavityDet = results.IRcavitydet-results.IRdf;
-
-% results.IRcavityfreq = 417.147178+results.IRDet*1e-6; % R_1(1) F=2 전이
-% results.IRAbsfreq = 417.20937+results.IRDet*1e-6; % R_1(1) F=2 전이
-% results.IRAbsfreq = 417.186005+results.IRDet*1e-6; % R_1(0) F=1 전이
-% results.UVAbsfreq = results.IRAbsfreq*2;
 
 % results.v = -results.Det/(446809870)*299792458/cos(pi/4); % for XY beam
 % results.v = -results.Det/(446809870)*299792458/cos(pi/4+atan(1.5/10)); % for XYt beam
-% results.v = -results.Det/(446809870)*299792458; % for Z beam
+% results.v = -results.UVfittedDetM/(446809870)*299792458; % for Z beam
 
 % results.maxv = 0.373./(results.t(results.baselinerange:end)*1e-6); % possible maximum velocity
 % results.mint = 0.373./results.v*1e6; % possible minimum arrival time, µs
