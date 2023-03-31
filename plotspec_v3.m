@@ -1,10 +1,12 @@
 function result = plotspec_v3(ax, data, kind, band)
 switch band
     case 'UV'
-        det = data.UVrealdetM;
+        % det = data.UVrealdetM;
+        det = data.UVfittedDetM;
 
     case 'IR'
-        det = data.IRrealdetM;
+        % det = data.IRrealdetM;
+        det = data.UVfittedDetM/2;
 
     otherwise
         error('try UV or IR');
