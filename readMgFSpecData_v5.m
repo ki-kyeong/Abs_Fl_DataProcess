@@ -83,8 +83,8 @@ for j = 1 : dfsize
 
     for i = 1:results.iteration
         Data = readmatrix(name+string(i-1)+"_"+num2str(f,'%.6f')+".csv",DataParams);
-        TotalAbsDatas(:,1:results.repititionPerStep,i,j) = Data(:,2:2:2*results.repititionPerStep)-results.AbsorptionBackgroundVoltage_mV_ *1e-3;
-        TotalAbsPFMDatas(:,1:results.repititionPerStep,i,j) = Data(:,2*(2*results.repititionPerStep+1):2:2*(3*results.repititionPerStep))-results.AbsorptionSamplingBackgroundVoltage_mV_*1e-3;
+        TotalAbsDatas(:,1:results.repititionPerStep,i,j) = Data(:,2:2:2*results.repititionPerStep)-results.AbsBgVoltage_mV_ *1e-3;
+        TotalAbsPFMDatas(:,1:results.repititionPerStep,i,j) = Data(:,2*(2*results.repititionPerStep+1):2:2*(3*results.repititionPerStep))-results.AbsBgVoltage_mV_*1e-3;
         TotalFlDatas(:,1:results.repititionPerStep,i,j) = Data(:,2*(results.repititionPerStep+1):2:2*(2*results.repititionPerStep));
     end
 end
@@ -106,9 +106,9 @@ switch normmode
                 for k = 1 : results.repititionPerStep
                 nn(:,k,i,j) = 1-(TotalAbsDatas(:,k,i,j)/mean(TotalAbsDatas(1:results.baselinerange,k,i,j)));
                 nnsp(:,k,i,j) = 1-(TotalAbsPFMDatas(:,k,i,j)/mean(TotalAbsPFMDatas(1:results.baselinerange,k,i,j)));
-                % nnn(:,k, i,j) = (TotalFlDatas(:,k, i,j)/mean(TotalFlDatas(results.baselinerange+8000/results.dt:end,k,i,j)))-1; % time trace 2D image를 그려보고 8 ms으로 정햇음...
+                nnn(:,k, i,j) = (TotalFlDatas(:,k, i,j)/mean(TotalFlDatas(results.baselinerange+12000/results.dt:end,k,i,j)))-1; % time trace 2D image를 그려보고 8 ms으로 정햇음...
                 % nnn(:,k, i,j) = (TotalFlDatas(:,k, i,j)/mean(TotalFlDatas(1:results.baselinerange,k,i,j)))-1;
-                nnn(:,k, i,j) = (TotalFlDatas(:,k, i,j)/mean(TotalFlDatas(2:results.baselinerange,k,i,j)))-1;
+                % nnn(:,k, i,j) = (TotalFlDatas(:,k, i, j)/mean(TotalFlDatas(2:results.baselinerange,k,i,j)))-1;
             end
         end
 
@@ -130,6 +130,7 @@ for j = 1 : dfsize
     % SumAbsDatas(j,:,:) = sum(results.AN(results.baselinerange+round(80/results.dt):results.baselinerange+3000/results.dt,:,:,j)); % ablation 이후 3 ms 까지
     % SumFlDatas(j,:,:) = sum(results.FN(results.baselinerange+4:end,:,:,j));
     SumFlDatas(j,:,:) = sum(results.FN(results.baselinerange+40/results.dt:end,:,:,j)); % ablation이 한 40 µs뒤에 끝남
+    % SumFlDatas(j,:,:) = sum(results.FN(results.baselinerange+40/results.dt:results.baselinerange+10000/results.dt,:,:,j)); % 한 10 ms까지만 더해보자
     
 end
 
@@ -146,10 +147,10 @@ results.FSte = std(SumFlDatas,0,[2 3])/sqrt(results.iteration*results.repitition
 % results.absfit = GF_MgF(results); % abs spectrum gaussian fit
 % results.UVfittedDet = results.UVrealdet -results.absfit.b3; % b3 = F=0 detuning
 
-% results.UVfittedDet = results.UVrealdet +62; % 그냥 적어줄 때
+results.UVfittedDet = results.UVrealdet; % 그냥 적어줄 때
 
-% results.UVfittedDetM = mean(results.UVfittedDet, 2);
-% results.UVfittedDetSte = std(results.UVfittedDet,0,2)/sqrt(results.iteration);
+results.UVfittedDetM = mean(results.UVfittedDet, 2);
+results.UVfittedDetSte = std(results.UVfittedDet,0,2)/sqrt(results.iteration);
 
 % z fl spectrum 으로 Det를 정할때
 % results.df = results.det(results.FM == max(results.FM));
