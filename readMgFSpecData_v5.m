@@ -5,7 +5,7 @@ close all;
 
 results.name = name;
 savename = split(name,'_');
-results.readme=readlines("./data/"+savename(end-1)+"_readme.txt", Encoding="UTF-8");
+results.readme=readlines(results.name+"readme.txt", Encoding="UTF-8");
 results.savename = savename(end-1);
 
 opt2 = detectImportOptions(name+"info.csv");
@@ -106,9 +106,9 @@ switch normmode
                 for k = 1 : results.repititionPerStep
                 nn(:,k,i,j) = 1-(TotalAbsDatas(:,k,i,j)/mean(TotalAbsDatas(1:results.baselinerange,k,i,j)));
                 nnsp(:,k,i,j) = 1-(TotalAbsPFMDatas(:,k,i,j)/mean(TotalAbsPFMDatas(1:results.baselinerange,k,i,j)));
-                nnn(:,k, i,j) = (TotalFlDatas(:,k, i,j)/mean(TotalFlDatas(results.baselinerange+12000/results.dt:end,k,i,j)))-1; % time trace 2D image를 그려보고 8 ms으로 정햇음...
+                % nnn(:,k, i,j) = (TotalFlDatas(:,k, i,j)/mean(TotalFlDatas(results.baselinerange+10000/results.dt:end,k,i,j)))-1; % time trace 2D image를 그려보고 8 ms으로 정햇음...
                 % nnn(:,k, i,j) = (TotalFlDatas(:,k, i,j)/mean(TotalFlDatas(1:results.baselinerange,k,i,j)))-1;
-                % nnn(:,k, i,j) = (TotalFlDatas(:,k, i, j)/mean(TotalFlDatas(2:results.baselinerange,k,i,j)))-1;
+                nnn(:,k, i,j) = (TotalFlDatas(:,k, i, j)/mean(TotalFlDatas(2:results.baselinerange,k,i,j)))-1;
             end
         end
 
@@ -127,10 +127,12 @@ end
 
 for j = 1 : dfsize
     SumAbsDatas(j,:,:) = sum(results.AN(results.baselinerange+round(80/results.dt):end,:,:,j)); % ablation 이후 80 µs 부터
-    % SumAbsDatas(j,:,:) = sum(results.AN(results.baselinerange+round(80/results.dt):results.baselinerange+3000/results.dt,:,:,j)); % ablation 이후 3 ms 까지
+    % SumAbsDatas(j,:,:) = sum(results.AN(results.baselinerange+round(80/results.dt):results.baselinerange+10000/results.dt,:,:,j)); % ablation 이후 5 ms 까지
     % SumFlDatas(j,:,:) = sum(results.FN(results.baselinerange+4:end,:,:,j));
-    SumFlDatas(j,:,:) = sum(results.FN(results.baselinerange+40/results.dt:end,:,:,j)); % ablation이 한 40 µs뒤에 끝남
+    % SumFlDatas(j,:,:) = sum(results.FN(results.baselinerange+80/results.dt:end,:,:,j)); % ablation이 한 40 µs뒤에 끝남
     % SumFlDatas(j,:,:) = sum(results.FN(results.baselinerange+40/results.dt:results.baselinerange+10000/results.dt,:,:,j)); % 한 10 ms까지만 더해보자
+    SumFlDatas(j,:,:) = sum(results.FN(results.baselinerange+round(80/results.dt):results.baselinerange+8000/results.dt,:,:,j)); % ablation 이후 5 ms 까지
+
     
 end
 
@@ -188,7 +190,6 @@ results.UVfittedDetSte = std(results.UVfittedDet,0,2)/sqrt(results.iteration);
 % results.FM2 = mean(results.FS2,2);
 % results.FSte2 = std(results.FS2,0,2)/sqrt(results.iteration);
 
-% results.absfit = GF_Li_v2(results, 1); % abs spectrum gaussian fit
 
 if plotmode == true
     plotfigureset_v3(results, results.savename, 'UV')

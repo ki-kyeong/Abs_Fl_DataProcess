@@ -17,18 +17,20 @@ end
 switch kind
     case 'abs'
         result = errorbar(ax, det, data.AM, data.ASte);
+        ylabel("Abs signa (a.u.)");
         title("abs spectrum");
         xlabel("det (MHz)");
 
     case 'fl1'
         result = errorbar(ax, det, data.FM, data.FSte);
+        ylabel("Fl signa (a.u.)");
         title("fl spectrum");
         xlabel("det (MHz)");
 
     case 'fl2'
         %         result = errorbar(ax, data.Det, data.FM2, data.FSte2, 'LineWidth',1);
         result = errorbar(ax, data.v, data.FM2, data.FSte2);
-
+        
         title("fl spectrum-2");
         % xlabel("velocity (m/s)",'fontsize',16);
 

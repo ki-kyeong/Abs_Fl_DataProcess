@@ -29,16 +29,29 @@ saveas(gcf, './K_results/'+savename+'_fl_spectrum.fig');
 % saveas(gcf, './K_results/'+savename+'_absfl_spectrum.fig');
 % 
 % 
-figure('Name',savename+" abs 2D")
+figure('Name',savename+" abs 2D");
 plot2Dtimedet_v2(gca, results, 'abs');
 saveas(gcf, './K_results/'+savename+'_abs_2D.png');
 saveas(gcf, './K_results/'+savename+'_abs_2D.fig');
 % 
 %
-figure('Name',savename+" fl 2D")
+figure('Name',savename+" fl 2D");
 plot2Dtimedet_v2(gca, results, 'fl1');
 saveas(gcf, './K_results/'+savename+'_fl_2D.png');
 saveas(gcf, './K_results/'+savename+'_fl_2D.fig');
+
+fig = figure('Name',savename+"abs_fl 2D");
+fig.Position = [476,360,906,420];
+tiledlayout(1,2)
+nexttile
+plot2Dtimedet_v2(gca, results, 'abs');
+
+nexttile
+plot2Dtimedet_v2(gca, results, 'fl1');
+
+saveas(gcf, './K_results/'+savename+'_absfl_2D.png');
+saveas(gcf, './K_results/'+savename+'_absfl_2D.fig');
+
 
 % figure('Name',savename+" fl 2D")
 % plot2Dtimedet_v2(gca, results, 'fl2');
