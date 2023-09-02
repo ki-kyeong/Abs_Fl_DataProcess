@@ -4,11 +4,11 @@ set(groot, 'defaultLineLineWidth',2)
 if Data.size.freq == 1
     switch kind
         case 'abs'
-            result = image(ax, Data.t*1e-3, 1:Data.size.rep, Data.abs.norm.', 'CDataMapping', 'Scaled');
+            result = imagesc(ax, Data.t*1e-3, 1:Data.size.rep, Data.abs.norm.');
         case 'fl1'
-            result = image(ax, Data.t*1e-3, 1:Data.size.rep, Data.fl.norm.', 'CDataMapping', 'Scaled');
+            result = imagesc(ax, Data.t*1e-3, 1:Data.size.rep, Data.fl.norm.');
         case 'fl2'
-            result = image(ax, Data.t*1e-3, 1:Data.size.rep, Data.fl.norm2.', 'CDataMapping', 'Scaled');
+            result = imagesc(ax, Data.t*1e-3, 1:Data.size.rep, Data.fl.norm2.');
         otherwise
             error('try abs or fl')
     end
@@ -24,11 +24,11 @@ else
     
     switch kind
         case 'abs'
-            result = image(ax, Data.t*1e-3, Data.det.UV.wm.mean, Data.abs.tt.', 'CDataMapping', 'Scaled')
+            result = imagesc(ax, Data.t*1e-3, Data.det.UV.wm.mean, Data.abs.tt.')
             ylabel("detuning (MHz)",'fontsize',16);
         case 'fl1'
-            % result = image(ax, Data.t*1e-3, Data.v, Data.fl.tt.', 'CDataMapping', 'Scaled'); hold on;
-            result = image(ax, Data.t*1e-3, Data.det.UV.wm.mean, Data.fl.tt.', 'CDataMapping', 'Scaled'); 
+            % result = imagesc(ax, Data.t*1e-3, Data.v, Data.fl.tt.'); hold on;
+            result = imagesc(ax, Data.t*1e-3, Data.det.UV.wm.mean, Data.fl.tt.'); 
             % hold on;
             % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv+2*Data.vshift, '-.w', 'LineWidth',0.8); hold on;
             % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv+Data.vshift, '-.w', 'LineWidth',0.8); hold on;
@@ -38,7 +38,7 @@ else
             % ylabel("velocity (m/s)",'fontsize',16);
             ylabel("detuning from Q_{12}(1) (MHz)",'fontsize',16);
         case 'fl2'
-            result = image(ax, Data.t*1e-3, Data.v, Data.fl.tt2.', 'CDataMapping', 'Scaled'); hold on;
+            result = imagesc(ax, Data.t*1e-3, Data.v, Data.fl.tt2.'); hold on;
             % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv+2*Data.vshift, '-.w', 'LineWidth',0.8); hold on;
             % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv+Data.vshift, '-.w', 'LineWidth',0.8); hold on;
             % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv, '-.w', 'LineWidth',0.8); hold on;
@@ -59,7 +59,7 @@ colorbar
 
 % % 
 
-% result = image(ax, Data.t(Data.baselinerange:end)*1e-3, Data.UVrealdet,...
+% result = imagesc(ax, Data.t(Data.baselinerange:end)*1e-3, Data.UVrealdet,...
 %     reshape(data(Data.baselinerange:end,:,:),...
 %     size(data(Data.baselinerange:end,:,:),1), size(data(Data.baselinerange:end,:,:),3)).',...
 %     'CDataMapping','scaled'); hold on;

@@ -134,8 +134,8 @@ results.fl.norm = TimeTraceNormalization_v1(results,'fl',8); % norm value is cal
 
 %% time trace 평균
 
-    results.abs.tt = TimeTraceMean_v1(data, 'abs');
-    results.fl.tt = TimeTraceMean_v1(data, 'fl');
+    results.abs.tt = TimeTraceMean_v1(results, 'abs');
+    results.fl.tt = TimeTraceMean_v1(results, 'fl');
 
 %% summing up the time trace data
 

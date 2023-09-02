@@ -35,11 +35,13 @@ if data.size.freq ~= 1
 elseif data.size.freq == 1
     figure('Name',data.savename+" abs tt");
     plot(data.t*1e-3, data.abs.tt);
+    xlim([0.08 10]);
     saveas(gcf, './K_results/'+data.savename+'_abs_tt.png');
     saveas(gcf, './K_results/'+data.savename+'_abs_tt.fig');
 
     figure('Name',data.savename+" fl tt");
     plot(data.t*1e-3, data.fl.tt);
+    xlim([0.08 10]);
     saveas(gcf, './K_results/'+data.savename+'_fl_tt.png');
     saveas(gcf, './K_results/'+data.savename+'_fl_tt.fig');
 end
