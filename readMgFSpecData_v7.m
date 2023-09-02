@@ -1,4 +1,4 @@
-function results = readMgFSpecData_v6(name, normmode, plotmode)
+function results = readMgFSpecData_v7(name, plotmode)
 
 clf;
 close all;
@@ -124,63 +124,32 @@ results.abs.raw = TotalAbsDatas;
 results.abs.pfm = TotalAbsPFMDatas;
 results.fl.raw = TotalFlDatas;
 
-switch normmode
-    case 'basic'
-        results.abs.norm = 1-(results.abs.raw/mean(results.abs.raw(results.baselinerange,1,1)));
-        results.fl.norm = results.fl.raw/mean(results.fl.raw(7000/results.dt:end,1,1))-1;
+%% normalizing time trace signal
 
-    case 'powernorm'
-        for j = 1 : results.size.freq
-            for i = 1 : results.size.iter
-                for k = 1 : results.size.rep
-                nn(:,k,i,j) = 1-(results.abs.raw(:,k,i,j)/mean(results.abs.raw(results.baselinerange,k,i,j)));
-                nnsp(:,k,i,j) = 1-(results.abs.pfm(:,k,i,j)/mean(results.abs.pfm(results.baselinerange,k,i,j)));
-                % nnn(:,k, i,j) = (results.fl.raw(:,k, i,j)/mean(results.fl.raw(results.baselineidx+11000/results.dt:end,k,i,j)))-1; % time trace 2D image를 그려보고 8 ms으로 정햇음...
-                % nnn(:,k, i,j) = (results.fl.raw(:,k, i,j)/mean(results.fl.raw(results.baselinerange,k,i,j)))-1;
-                % nnn(:,k, i,j) = results.fl.raw(:,k, i, j)-mean(results.fl.raw(results.baselinerange,k,i,j));
-                nnn(:,k, i,j) = (results.fl.raw(:,k, i,j)-mean(results.fl.raw(results.baselineidx+8000/results.dt:end,k,i,j))); % time trace 2D image를 그려보고 8 ms으로 정햇음...
-                % nnnsp(:, k,i,j) = results.abs.pfm(:,k,i,j)/mean(results.abs.pfm(results.baselinerange,k,i,j));
-                end
-            end
+results.abs.rawnorm = TimeTraceNormalization_v1(results,'abs',8);
+results.abs.pfmnorm = TimeTraceNormalization_v1(results,'pfm',8);
+results.abs.norm = results.abs.rawnorm-results.abs.pfmnorm;
 
-        results.abs.rawnorm = nn;
-        results.abs.pfmnorm = nnsp;
-        results.abs.norm = nn-nnsp;
+results.fl.norm = TimeTraceNormalization_v1(results,'fl',8); % norm value is calculated after 8 ms
 
-        results.fl.rawnorm = nnn;
-        % results.fl.pfmnorm = nnnsp;
-        % results.fl.norm = nnn+nnnsp-1;
-        results.fl.norm = nnn;
+%% time trace 평균
 
-        end
-    otherwise
-        error('try basic of powernorm')
-end
+    results.abs.tt = TimeTraceMean_v1(data, 'abs');
+    results.fl.tt = TimeTraceMean_v1(data, 'fl');
 
+%% summing up the time trace data
 
-%% rep들을 미리 평균낸것도 계산해주자.
+results.abs.sum = TimeTraceSum_v1(results,'abs',0.08, size(results.t,2));
+results.fl.sum = TimeTraceSum_v1(results,'fl',1, 8);
 
-    results.abs.tt = reshape(mean(results.abs.norm, [2 3]),results.size.time, results.size.freq);
-    results.fl.tt = reshape(mean(results.fl.norm, [2 3]), results.size.time, results.size.freq);
-
-
-
-for j = 1 : results.size.freq
-    SumAbsDatas(j,:,:) = sum(results.abs.norm(results.baselineidx+round(80/results.dt):end,:,:,j)); % ablation 이후 80 µs 부터
-    % SumAbsDatas(j,:,:) = sum(results.AN(results.baselinerange+round(80/results.dt):results.baselinerange+10000/results.dt,:,:,j)); % ablation 이후 5 ms 까지
-    % SumFlDatas(j,:,:) = sum(results.FN(results.baselinerange+4:end,:,:,j));
-    % SumFlDatas(j,:,:) = sum(results.FN(results.baselinerange+80/results.dt:end,:,:,j)); % ablation이 한 40 µs뒤에 끝남
-    SumFlDatas(j,:,:) = sum(results.fl.norm(results.baselineidx+1000/results.dt:results.baselineidx+8000/results.dt,:,:,j)); % 한 10 ms까지만 더해보자
-    % SumFlDatas(j,:,:) = sum(results.fl.norm(results.baselineidx+round(2000/results.dt):results.baselineidx+6000/results.dt,:,:,j)); % ablation 이후 5 ms 까지
-end
-
-results.abs.sum = SumAbsDatas;
-results.fl.sum = SumFlDatas;
+%% Making spectrum data
 
 results.abs.mean = mean(results.abs.sum,[2 3]); % results.repititionPerStep, results.iteration 전부 평균
 results.abs.ste = std(results.abs.sum,0,[2 3])/sqrt(results.size.iter*results.size.rep);
 results.fl.mean = mean(results.fl.sum,[2 3]);
 results.fl.ste = std(results.fl.sum,0,[2 3])/sqrt(results.size.iter*results.size.rep);
+
+%% Frequency compasation
 
 % abs spectrum fit으로 Det를 정할때
 

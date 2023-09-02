@@ -1,11 +1,14 @@
 function result = plot2Dtimedet_v3(ax, Data, kind)
-
+set(groot, 'defaultAxesFontSize',18)
+set(groot, 'defaultLineLineWidth',2)
 if Data.size.freq == 1
     switch kind
         case 'abs'
             result = image(ax, Data.t*1e-3, 1:Data.size.rep, Data.abs.norm.', 'CDataMapping', 'Scaled');
         case 'fl1'
             result = image(ax, Data.t*1e-3, 1:Data.size.rep, Data.fl.norm.', 'CDataMapping', 'Scaled');
+        case 'fl2'
+            result = image(ax, Data.t*1e-3, 1:Data.size.rep, Data.fl.norm2.', 'CDataMapping', 'Scaled');
         otherwise
             error('try abs or fl')
     end
@@ -24,7 +27,23 @@ else
             result = image(ax, Data.t*1e-3, Data.det.UV.wm.mean, Data.abs.tt.', 'CDataMapping', 'Scaled')
             ylabel("detuning (MHz)",'fontsize',16);
         case 'fl1'
-            result = image(ax, Data.t*1e-3, Data.v, Data.fl.tt.', 'CDataMapping', 'Scaled')
+            % result = image(ax, Data.t*1e-3, Data.v, Data.fl.tt.', 'CDataMapping', 'Scaled'); hold on;
+            result = image(ax, Data.t*1e-3, Data.det.UV.wm.mean, Data.fl.tt.', 'CDataMapping', 'Scaled'); 
+            % hold on;
+            % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv+2*Data.vshift, '-.w', 'LineWidth',0.8); hold on;
+            % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv+Data.vshift, '-.w', 'LineWidth',0.8); hold on;
+            % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv, '-.w', 'LineWidth',0.8); hold on;
+            % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv-Data.vshift, '-.w', 'LineWidth',0.8); hold on;
+            % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv-2*Data.vshift, '-.w', 'LineWidth',0.8); hold off;
+            % ylabel("velocity (m/s)",'fontsize',16);
+            ylabel("detuning from Q_{12}(1) (MHz)",'fontsize',16);
+        case 'fl2'
+            result = image(ax, Data.t*1e-3, Data.v, Data.fl.tt2.', 'CDataMapping', 'Scaled'); hold on;
+            % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv+2*Data.vshift, '-.w', 'LineWidth',0.8); hold on;
+            % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv+Data.vshift, '-.w', 'LineWidth',0.8); hold on;
+            % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv, '-.w', 'LineWidth',0.8); hold on;
+            % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv-Data.vshift, '-.w', 'LineWidth',0.8); hold on;
+            % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv-2*Data.vshift, '-.w', 'LineWidth',0.8); hold off;
             ylabel("velocity (m/s)",'fontsize',16);
         otherwise
             error('try abs or fl')
@@ -49,10 +68,10 @@ colorbar
 %     case 'abs'
 % 
 %     case 'fl1'
-%         plot(Data.t(Data.baselinerange:end)*1e-3,Data.maxv, '-.w', 'LineWidth',0.8); hold off;
+%         plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv, '-.w', 'LineWidth',0.8); hold off;
 % 
 %     case 'fl2'             
-%         plot(Data.t(Data.baselinerange:end)*1e-3,Data.maxv, '-.w', 'LineWidth',0.8); hold off;
+%         plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv, '-.w', 'LineWidth',0.8); hold off;
 % end
 
 
