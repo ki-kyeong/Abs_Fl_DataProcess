@@ -41,7 +41,7 @@ elseif data.size.freq == 1
 
     figure('Name',data.savename+" fl tt");
     plot(data.t*1e-3, data.fl.tt);
-    xlim([0.08 10]);
+    xlim([1 10]);
     saveas(gcf, './K_results/'+data.savename+'_fl_tt.png');
     saveas(gcf, './K_results/'+data.savename+'_fl_tt.fig');
 end
@@ -49,13 +49,13 @@ end
 
 % 
 figure('Name',data.savename+" abs 2D");
-plot2Dtimedet_v3(gca, data, 'abs');
+plot2Dtimedet_v4(gca, data, 'abs', 0.08, 10);
 saveas(gcf, './K_results/'+data.savename+'_abs_2D.png');
 saveas(gcf, './K_results/'+data.savename+'_abs_2D.fig');
 % 
 %
 figure('Name',data.savename+" fl 2D");
-plot2Dtimedet_v3(gca, data, 'fl1');
+plot2Dtimedet_v4(gca, data, 'fl1', 0.5, 10);
 saveas(gcf, './K_results/'+data.savename+'_fl_2D.png');
 saveas(gcf, './K_results/'+data.savename+'_fl_2D.fig');
 
