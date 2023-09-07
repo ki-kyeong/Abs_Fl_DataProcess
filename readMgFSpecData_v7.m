@@ -144,9 +144,9 @@ results.fl.sum = TimeTraceSum_v1(results,'fl',1, 8);
 
 %% Making spectrum data
 
-results.abs.mean = mean(results.abs.sum,[2 3]); % results.repititionPerStep, results.iteration 전부 평균
+results.abs.mean = squeeze(mean(results.abs.sum,[2 3])); % results.repititionPerStep, results.iteration 전부 평균
 results.abs.ste = std(results.abs.sum,0,[2 3])/sqrt(results.size.iter*results.size.rep);
-results.fl.mean = mean(results.fl.sum,[2 3]);
+results.fl.mean = squeeze(mean(results.fl.sum,[2 3]));
 results.fl.ste = std(results.fl.sum,0,[2 3])/sqrt(results.size.iter*results.size.rep);
 
 %% Frequency compasation
