@@ -1,7 +1,7 @@
 function result = plot2Dtimedet_v3(ax, Data, kind)
 set(groot, 'defaultAxesFontSize',18)
 set(groot, 'defaultLineLineWidth',2)
-if Data.size.freq == 1
+if Data.size.freq == 1 || Data.size.iter == 1
     switch kind
         case 'abs'
             result = imagesc(ax, Data.t*1e-3, 1:Data.size.rep, Data.abs.norm.');

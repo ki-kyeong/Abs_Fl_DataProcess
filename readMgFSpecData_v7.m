@@ -3,6 +3,8 @@ function results = readMgFSpecData_v7(name, plotmode)
 clf;
 close all;
 
+
+
 %===========================
 results.name = name;
 savename = split(name,'_');
@@ -24,6 +26,8 @@ end
 
 results.size.iter = results.iteration;
 
+%%
+
 %======================================
 % read each iteration wavemeter data 
 % first column = cavity freq
@@ -37,6 +41,7 @@ end
 
 results.freq.IR.cavity = results.wavemeter_data{:,1}(:,1);
 results.det.IR.cavity = (results.freq.IR.cavity-417.1472425)*1e6; % MHz, from Q12(1)
+% results.det.IR.cavity = (results.freq.IR.cavity-417.147178)*1e6; % MHz, from P1(1), F=2
 results.freq.UV.cavity = 2*results.freq.IR.cavity;
 results.det.UV.cavity = 2*results.det.IR.cavity;
 
@@ -52,6 +57,7 @@ results.freq.IR.wm.mean = mean(results.freq.IR.wm.raw,2);
 results.freq.IR.wm.ste = std(results.freq.IR.wm.raw,0,2)/sqrt(results.size.iter);
 
 results.det.IR.wm.raw = (results.freq.IR.wm.raw-417.1472425)*1e6; % MHz
+% results.det.IR.wm.raw = (results.freq.IR.wm.raw-417.147178)*1e6; % MHz
 results.det.IR.wm.mean = mean(results.det.IR.wm.raw,2);
 results.det.IR.wm.ste = std(results.det.IR.wm.raw,0,2)/sqrt(results.size.iter); 
 
@@ -124,13 +130,18 @@ results.abs.raw = TotalAbsDatas;
 results.abs.pfm = TotalAbsPFMDatas;
 results.fl.raw = TotalFlDatas;
 
+%%
+results.normtime.start = 8;
+results.sumtime.start = 0.08;
+results.sumtime.end = results.t(end)*1e-3;
+
 %% normalizing time trace signal
 
-results.abs.rawnorm = TimeTraceNormalization_v1(results,'abs',8);
-results.abs.pfmnorm = TimeTraceNormalization_v1(results,'pfm',8);
+results.abs.rawnorm = TimeTraceNormalization_v1(results,'abs',results.normtime.start);
+results.abs.pfmnorm = TimeTraceNormalization_v1(results,'pfm',results.normtime.start);
 results.abs.norm = results.abs.rawnorm-results.abs.pfmnorm;
 
-results.fl.norm = TimeTraceNormalization_v1(results,'fl',8); % norm value is calculated after 8 ms
+results.fl.norm = TimeTraceNormalization_v1(results,'fl', results.normtime.start); % norm value is calculated after 8 ms
 
 %% time trace 평균
 
@@ -139,8 +150,8 @@ results.fl.norm = TimeTraceNormalization_v1(results,'fl',8); % norm value is cal
 
 %% summing up the time trace data
 
-results.abs.sum = TimeTraceSum_v1(results,'abs',0.08, size(results.t,2));
-results.fl.sum = TimeTraceSum_v1(results,'fl',1, 8);
+results.abs.sum = TimeTraceSum_v1(results,'abs',results.sumtime.start, results.sumtime.end);
+results.fl.sum = TimeTraceSum_v1(results,'fl',results.sumtime.start, results.sumtime.end);
 
 %% Making spectrum data
 
@@ -168,39 +179,41 @@ results.det.UV.fit.ste = std(results.det.UV.fit.raw,0,2)/sqrt(results.size.iter)
 
 % 
 % results.v = -results.det.UV.fit.mean/(2*417147242.5)*299792458/cos(pi/4); % for XY beam
+results.v = -results.det.UV.fit.mean/(2*417147178)*299792458/cos(pi/4); % for XY beam
 % % results.vshift = -120/(2*417147242.5)*299792458/cos(pi/4); % for XY beam
 % % results.v = -results.det.UV.fit.mean/(2*417147242.5)*299792458/cos(pi/4+atan(1.5/10)); % for XYt beam
 % results.v = -results.det.UV.fit.mean/(2*417147242.5)*299792458; % for Z beam
+% results.v = -results.det.UV.fit.mean/(2*417147178)*299792458; % for Z beam
 % 
-% results.maxv = 0.373./(results.t(results.baselineidx:end)*1e-6); % possible maximum velocity
-% results.mint = 0.373./results.v*1e6; % possible minimum arrival time, µs
+results.maxv = 0.373./(results.t(results.baselineidx:end)*1e-6); % possible maximum velocity
+results.mint = 0.373./results.v*1e6; % possible minimum arrival time, µs
 % % results.mint2 = 0.373./(results.v+results.vshift)*1e6; % extract eom freq signal
 % % 
-% results.fl.norm2 = results.fl.norm; % normalized with first fls data
-% results.fl.sum2 = zeros(size(results.fl.sum)); % summatino of each results.iteration of fls time signal
+results.fl.norm2 = results.fl.norm; % normalized with first fls data
+results.fl.sum2 = zeros(size(results.fl.sum)); % summatino of each results.iteration of fls time signal
 % 
-% for j = 1 : results.size.freq
-%    if results.mint(j) <=0
-%        results.fl.norm2(:,:,:,j) = 0;
-%    else
-%        results.fl.norm2(results.t<= results.mint(j),:,:,j) = 0;
-%        % if results.mint2(j)>=0
-%        %     results.fl.norm2(results.t>= results.mint2(j),:,:,j) = 0;
-%        % end
-%    end
+for j = 1 : results.size.freq
+   if results.mint(j) <=0
+       results.fl.norm2(:,:,:,j) = 0;
+   else
+       results.fl.norm2(results.t<= results.mint(j),:,:,j) = 0;
+       % if results.mint2(j)>=0
+       %     results.fl.norm2(results.t>= results.mint2(j),:,:,j) = 0;
+       % end
+   end
+
+end
 % 
-% end
+results.fl.tt2 = reshape(mean(results.fl.norm2, [2 3]), results.size.time, results.size.freq);
 % 
-% results.fl.tt2 = reshape(mean(results.fl.norm2, [2 3]), results.size.time, results.size.freq);
-% 
-% for j = 1 : results.size.freq
-%     results.fl.sum2(j,:,:) = sum(results.fl.norm2(results.baselineidx+round(80/results.dt):results.baselineidx+6000/results.dt,:,:,j));
-% end
-% 
-% 
-% 
-% results.fl.mean2 = mean(results.fl.sum2,[2 3]);
-% results.fl.ste2 = std(results.fl.sum2,0,[2 3])/sqrt(results.size.iter*results.size.rep);
+for j = 1 : results.size.freq
+    results.fl.sum2(j,:,:) = sum(results.fl.norm2(results.baselineidx+round(80/results.dt):results.baselineidx+6000/results.dt,:,:,j));
+end
+
+
+
+results.fl.mean2 = mean(results.fl.sum2,[2 3]);
+results.fl.ste2 = std(results.fl.sum2,0,[2 3])/sqrt(results.size.iter*results.size.rep);
 
 
 if plotmode == true

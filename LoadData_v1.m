@@ -1,4 +1,4 @@
-function [result, logline] = LoadData_v1(date, runs, figuremode, savemode)
+function [result, logline] = LoadData_v1(date, runs, figuremode)
 
 for i = runs
     name = "./data/2023-"+date+"_run"+string(i)+"_";
@@ -14,8 +14,8 @@ end
 
 logline = arrayfun(@(x) x.readme, result, UniformOutput=false)';
 
-if savemode == 1
-    save('DataFile.mat',"-v7.3");
-end
+% if savemode == 1
+%     save('DataFile.mat',"-v7.3");
+% end
 
 end

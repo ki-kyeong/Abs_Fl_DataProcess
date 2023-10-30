@@ -146,10 +146,10 @@ results.FSte = std(SumFlDatas,0,[2 3])/sqrt(results.iteration*results.repitition
 
 % abs spectrum fit으로 Det를 정할때
 
-% results.absfit = GF_MgF(results); % abs spectrum gaussian fit
-% results.UVfittedDet = results.UVrealdet -results.absfit.b3; % b3 = F=0 detuning
+results.absfit = GF_MgF(results); % abs spectrum gaussian fit
+results.UVfittedDet = results.UVrealdet -results.absfit.b3; % b3 = F=0 detuning
 
-results.UVfittedDet = results.UVrealdet; % 그냥 적어줄 때
+% results.UVfittedDet = results.UVrealdet; % 그냥 적어줄 때
 
 results.UVfittedDetM = mean(results.UVfittedDet, 2);
 results.UVfittedDetSte = std(results.UVfittedDet,0,2)/sqrt(results.iteration);
