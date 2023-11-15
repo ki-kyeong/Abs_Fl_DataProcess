@@ -131,7 +131,7 @@ results.abs.pfm = TotalAbsPFMDatas;
 results.fl.raw = TotalFlDatas;
 
 %%
-results.normtime.start = 8;
+results.normtime.start = 18;
 results.sumtime.start = 0.08;
 results.sumtime.end = results.t(end)*1e-3;
 

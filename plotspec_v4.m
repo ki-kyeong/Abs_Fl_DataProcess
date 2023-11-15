@@ -1,8 +1,4 @@
 function result = plotspec_v4(ax, data, kind, band)
-set(groot, 'defaultLineLineWidth',1.5)
-set(groot, 'defaultAxesFontSize',18)
-set(groot, 'defaultAxesLineWidth',1)
-pbaspect([1.5,1,1])
 
 
 
@@ -24,8 +20,8 @@ end
 
 switch kind
     case 'abs'
-        result = plot(ax, det, data.abs.mean);
-        % result = errorbar(ax, det, data.abs.mean, data.abs.ste);
+        % result = plot(ax, det, data.abs.mean);
+        result = errorbar(ax, det, data.abs.mean, data.abs.ste);
         % result = errorbar(ax, det, data.abs.mean, data.abs.ste, ".", "MarkerSize",8);
         ylabel("Abs. signal (a.u.)");
         % title("abs spectrum");

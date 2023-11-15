@@ -1,4 +1,4 @@
-afunction results = plotfigureset_v4(data, band)
+function results = plotfigureset_v4(data, band)
 clf;
 
 % savename = data.savename;
