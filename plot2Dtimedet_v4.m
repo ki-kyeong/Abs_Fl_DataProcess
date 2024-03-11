@@ -32,15 +32,16 @@ else
             ylabel("detuning (MHz)",'fontsize',16);
         case 'fl1'
             result = imagesc(ax, Data.t(StartTimeIdx:EndTimeIdx)*1e-3, Data.v, Data.fl.tt(StartTimeIdx:EndTimeIdx,:).'); hold on;
-            % result = imagesc(ax, Data.t(StartTimeIdx:EndTimeIdx)*1e-3, Data.det.UV.wm.mean, Data.fl.tt(StartTimeIdx:EndTimeIdx,:).'); 
+            % result = imagesc(ax, Data.t(StartTimeIdx:EndTimeIdx)*1e-3, Data.det.UV.wm.mean, Data.fl.tt(StartTimeIdx:EndTimeIdx,:).'); hold on; 
             % hold on;
             % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv+2*Data.vshift, '-.w', 'LineWidth',0.8); hold on;
             % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv+Data.vshift, '-.w', 'LineWidth',0.8); hold on;
             plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv, '-.w', 'LineWidth',0.8); hold off;
             % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv-Data.vshift, '-.w', 'LineWidth',0.8); hold off;
             % plot(Data.t(Data.baselineidx:end)*1e-3,Data.maxv-2*Data.vshift, '-.w', 'LineWidth',0.8); hold off;
-            ylabel("velocity (m/s)",'fontsize',16);
+            % ylabel("velocity (m/s)",'fontsize',16);
             % ylabel("detuning from Q_{12}(1) (MHz)",'fontsize',16);
+            ylabel("detuning from P_{1}(1) (MHz)",'fontsize',16);
             
         case 'fl2'
             result = imagesc(ax, Data.t(StartTimeIdx:EndTimeIdx)*1e-3, Data.v, Data.fl.tt2(StartTimeIdx:EndTimeIdx,:).'); hold on;

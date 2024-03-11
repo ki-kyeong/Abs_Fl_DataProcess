@@ -1,4 +1,4 @@
-function results = readMgFSpecData_v7(name, plotmode)
+function results = readMgFSpecData_v7_1(name, plotmode)
 
 clf;
 close all;
@@ -92,6 +92,9 @@ results.size.rep = results.repititionPerStep;
 DataParams = detectImportOptions(name+'0_'+num2str(results.freq.IR.cavity(1),'%.6f')+".csv");
 Data = readmatrix(name+'0_'+num2str(results.freq.IR.cavity(1),'%.6f')+".csv",DataParams);
 
+WaveFormParams = detectImportOptions(name+'0_'+num2str(results.freq.IR.cavity(1),'%.6f')+"_waveform_monitor.csv");
+WaveFormData = readmatrix(name+'0_'+num2str(results.freq.IR.cavity(1),'%.6f')+"_waveform_monitor.csv",WaveFormParams);
+
 results.dt = (Data(2,1)-Data(1,1))*1e6; % µs unit
 
 results.size.time = size(Data,1);
@@ -104,11 +107,12 @@ TotalFlDatas = zeros(results.size.time,results.size.rep, results.size.iter, resu
 % NormFlDatas = zeros(size(TotalFlDatas)); % normalized with first fls data
 SumFlDatas = zeros(results.size.freq,results.size.rep, results.size.iter); % summatino of each results.iteration of fls time signal
 
-
+WaveFormDatas = zeros(size(WaveFormData,1), results.size.rep, results.size.iter, results.size.freq);
 
 results.baselineidx = round(96/results.dt); % 96 µs에서 ablation 시작 140 µs에서 끝
 results.baselinerange = [1 results.baselineidx];
 results.t = (Data(:,1)-Data(results.baselineidx,1))*1e6; % µs, 98 µs을 0초로 설정
+results.wf.t = (WaveFormData(:,1))*1e6; % µs
 
 wb = waitbar(0, ' Getting started');
 
@@ -125,6 +129,9 @@ for j = 1 : results.size.freq
         TotalAbsDatas(:,1:results.size.rep,i,j) = Data(:,2:2:2*results.size.rep)-expPara(7)*1e-3;
         TotalAbsPFMDatas(:,1:results.size.rep,i,j) = Data(:,2*(2*results.size.rep+1):2:2*(3*results.size.rep))-expPara(7)*1e-3;
         TotalFlDatas(:,1:results.size.rep,i,j) = Data(:,2*(results.size.rep+1):2:2*(2*results.size.rep));
+                
+        WaveFormData = readmatrix(name+string(i-1)+"_"+num2str(f,'%.6f')+"_waveform_monitor.csv",WaveFormParams);
+        WaveFormDatas(:,1:results.size.rep,i,j) = WaveFormData(:,2:2:2*results.size.rep);
     end
 end
 
@@ -133,6 +140,7 @@ close(wb)
 results.abs.raw = TotalAbsDatas;
 results.abs.pfm = TotalAbsPFMDatas;
 results.fl.raw = TotalFlDatas;
+results.wf.raw = WaveFormDatas;
 
 %%
 results.normtime.start = 18;
