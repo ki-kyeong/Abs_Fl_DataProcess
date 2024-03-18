@@ -1,4 +1,6 @@
-function result = readMgFSpecData_v8(name, plotmode)
+function result = readMgFSpecData_v9(name, plotmode)
+
+% rep의 첫번째 데이터는 버리도록 수정 24/03/18
 
 clf;
 close all;
@@ -27,6 +29,16 @@ result.savename = savename(end-1);
 %===========================
 result.readme=readlines(result.name+"readme.txt", Encoding="UTF-8");
 
+%======================================
+% read parameter data
+
+opt = detectImportOptions(name+"parameter.csv");
+expPara = readmatrix(name+"parameter.csv",opt);
+
+for i = 1 : size(opt.VariableNames,2)
+    result.(opt.VariableNames{i}) = expPara(i);
+end
+
 %===========================
 % read run informations
 
@@ -39,6 +51,7 @@ end
 
 %===========================
 result.size.iter = result.iteration;
+result.size.rep = result.repititionPerStep-1;
 
 %======================================
 % read each iteration wavemeter data
@@ -53,7 +66,7 @@ end
 result.freq.IR.cavity = result.wavemeter_data{:,1}(:,1);
 
 for i = 1: result.size.iter
-    result.freq.IR.wm.raw(:,i) = result.wavemeter_data{:,i}(:,2);
+    result.freq.IR.wm.raw(:,:,i) = result.wavemeter_data{:,i}(:,3:end);
 end
 
 % freq size
@@ -66,28 +79,17 @@ result.size.freq = size(result.freq.IR.cavity,1);
 result.freq.UV.cavity = 2*result.freq.IR.cavity;
 
 % wavemeter freq sorting and analysis
-result.freq.IR.wm.raw = result.freq.IR.wm.raw(result.randidx,:);
-result.freq.IR.wm.mean = mean(result.freq.IR.wm.raw,2);
-result.freq.IR.wm.ste = std(result.freq.IR.wm.raw,0,2)/sqrt(result.size.iter);
+result.freq.IR.wm.raw = result.freq.IR.wm.raw(result.randidx,3:end,:);
+result.freq.IR.wm.mean = mean(result.freq.IR.wm.raw,[2 3]);
+result.freq.IR.wm.ste = std(result.freq.IR.wm.raw,0,[2 3])/sqrt(result.size.iter*result.size.rep);
 
 result.freq.UV.wm.raw = 2*result.freq.IR.wm.raw;
 result.freq.UV.wm.mean = 2*result.freq.IR.wm.mean;
-result.freq.UV.wm.ste = std(result.freq.UV.wm.raw,0,2)/sqrt(result.size.iter);
+result.freq.UV.wm.ste = std(result.freq.UV.wm.raw,0,[2 3])/sqrt(result.size.iter*result.size.rep);
 
 % detuning cal
 result = detcal_v1(result);
 
-%======================================
-% read parameter data
-
-opt = detectImportOptions(name+"parameter.csv");
-expPara = readmatrix(name+"parameter.csv",opt);
-
-for i = 1 : size(opt.VariableNames,2)
-    result.(opt.VariableNames{i}) = expPara(i);
-end
-
-result.size.rep = result.repititionPerStep;
 
 %======================================
 % read data for initializing
@@ -123,9 +125,9 @@ for j = 1 : result.size.freq
 
     for i = 1:result.size.iter
         Data = readmatrix(name+string(i-1)+"_"+num2str(f,'%.6f')+".csv",DataParams);
-        TotalAbsDatas(:,1:result.size.rep,i,j) = Data(:,2:2:2*result.size.rep)-expPara(7)*1e-3;
-        TotalAbsPFMDatas(:,1:result.size.rep,i,j) = Data(:,2*(2*result.size.rep+1):2:2*(3*result.size.rep))-expPara(7)*1e-3;
-        TotalFlDatas(:,1:result.size.rep,i,j) = lowpass(Data(:,2*(result.size.rep+1):2:2*(2*result.size.rep)),50e-4/(result.dt*1e-6), 1/(result.dt*1e-6)); % LPF 2 kHz
+        TotalAbsDatas(:,1:result.size.rep,i,j) = Data(:,4:2:2*(result.size.rep+1))-expPara(7)*1e-3;
+        TotalAbsPFMDatas(:,1:result.size.rep,i,j) = Data(:,2*(2*(result.size.rep+1)+1)+2:2:2*(3*(result.size.rep+1)))-expPara(7)*1e-3;
+        TotalFlDatas(:,1:result.size.rep,i,j) = lowpass(Data(:,2*((result.size.rep+1)+1)+2:2:2*(2*(result.size.rep+1))),50e-4/(result.dt*1e-6), 1/(result.dt*1e-6)); % LPF 2 kHz
     end
 end
 
@@ -163,7 +165,7 @@ result.fl.ste = std(result.fl.sum,0,[2 3])/sqrt(result.size.iter*result.size.rep
 result.abs.mean_iter = squeeze(mean(result.abs.sum,2)); % results.repititionPerStep 평균
 result.abs.ste_iter = std(result.abs.sum,0,2)/sqrt(result.size.rep);
 result.fl.mean_iter = squeeze(mean(result.fl.sum,2));
-result.fl.ste_iter = std(result.fl.sum,0,2)/sqrt(result.size.rep);
+result.fl.ste_iter = squeeze(std(result.fl.sum,0,2)/sqrt(result.size.rep));
 
 %% Frequency compasation
 
@@ -175,11 +177,11 @@ result.fl.ste_iter = std(result.fl.sum,0,2)/sqrt(result.size.rep);
 result.det.UV.fit.raw.P = result.det.UV.wm.raw.P; % 그냥 적어줄 때
 result.det.UV.fit.raw.Q = result.det.UV.wm.raw.Q; % 그냥 적어줄 때
 
-result.det.UV.fit.mean.P = mean(result.det.UV.fit.raw.P, 2);
-result.det.UV.fit.ste.P = std(result.det.UV.fit.raw.P,0,2)/sqrt(result.size.iter);
+result.det.UV.fit.mean.P = mean(result.det.UV.fit.raw.P, [2 3]);
+result.det.UV.fit.ste.P = std(result.det.UV.fit.raw.P,0,[2 3])/sqrt(result.size.iter*result.size.rep);
 
-result.det.UV.fit.mean.Q = mean(result.det.UV.fit.raw.Q, 2);
-result.det.UV.fit.ste.Q = std(result.det.UV.fit.raw.Q,0,2)/sqrt(result.size.iter);
+result.det.UV.fit.mean.Q = mean(result.det.UV.fit.raw.Q, [2 3]);
+result.det.UV.fit.ste.Q = std(result.det.UV.fit.raw.Q,0,[2 3])/sqrt(result.size.iter*result.size.rep);
 
 % z fl spectrum 으로 Det를 정할때
 % results.df = results.det(results.FM == max(results.FM));

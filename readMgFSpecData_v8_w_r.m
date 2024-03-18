@@ -1,4 +1,4 @@
-function result = readMgFSpecData_v8(name, plotmode)
+function result = readMgFSpecData_v8_w_r(name,iter, plotmode)
 
 clf;
 close all;
@@ -38,7 +38,7 @@ for i = 1 : size(opt2.VariableNames,2)
 end
 
 %===========================
-result.size.iter = result.iteration;
+result.size.iter = length(iter);
 
 %======================================
 % read each iteration wavemeter data
@@ -46,7 +46,8 @@ result.size.iter = result.iteration;
 % second column = wavemeter freq
 
 for i = 1 : result.size.iter
-    result.wavemeter_data{i} = readmatrix(name+string(i-1)+"_wavemeter_data.csv");
+    ii = iter(i);
+    result.wavemeter_data{i} = readmatrix(name+string(ii-1)+"_wavemeter_data.csv");
 end
 
 %===========================
@@ -122,7 +123,8 @@ for j = 1 : result.size.freq
         'WindowStyle','modal');
 
     for i = 1:result.size.iter
-        Data = readmatrix(name+string(i-1)+"_"+num2str(f,'%.6f')+".csv",DataParams);
+        ii = iter(i);
+        Data = readmatrix(name+string(ii-1)+"_"+num2str(f,'%.6f')+".csv",DataParams);
         TotalAbsDatas(:,1:result.size.rep,i,j) = Data(:,2:2:2*result.size.rep)-expPara(7)*1e-3;
         TotalAbsPFMDatas(:,1:result.size.rep,i,j) = Data(:,2*(2*result.size.rep+1):2:2*(3*result.size.rep))-expPara(7)*1e-3;
         TotalFlDatas(:,1:result.size.rep,i,j) = lowpass(Data(:,2*(result.size.rep+1):2:2*(2*result.size.rep)),50e-4/(result.dt*1e-6), 1/(result.dt*1e-6)); % LPF 2 kHz
