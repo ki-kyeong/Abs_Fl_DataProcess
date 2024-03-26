@@ -9,9 +9,9 @@ close all;
 result.normtime.start = 18;
 
 %===========================
-result.sumtime.start = 0.08;
 % results.sumtime.end = results.t(end)*1e-3;
-result.sumtime.end = 18;
+result.abs.sumendtime = 18; % ms
+result.fl.sumendtime = 18; % ms
 
 %===========================
 % beamaxisopt.Default = 'z';
@@ -106,12 +106,8 @@ TotalAbsPFMDatas = zeros(result.size.time, result.size.rep, result.size.iter, re
 TotalFlDatas = zeros(result.size.time,result.size.rep, result.size.iter, result.size.freq); % fls time signal row data
 
 
-
-
-
-result.baselineidx = round(96/result.dt); % 96 µs에서 ablation 시작 140 µs에서 끝
-result.baselinerange = [1 result.baselineidx];
-result.t = (Data(:,1)-Data(result.baselineidx,1))*1e6; % µs, 98 µs을 0초로 설정
+result.baselineidx = round(40/result.dt); % 40 us에서 ablation peak끝
+result.t = (Data(:,1)-Data(result.baselineidx,1))*1e6; % µs, 40 µs을 0초로 설정
 
 wb = waitbar(0, ' Getting started');
 
@@ -126,8 +122,9 @@ for j = 1 : result.size.freq
     for i = 1:result.size.iter
         Data = readmatrix(name+string(i-1)+"_"+num2str(f,'%.6f')+".csv",DataParams);
         TotalAbsDatas(:,1:result.size.rep,i,j) = Data(:,4:2:2*(result.size.rep+1))-expPara(7)*1e-3;
-        TotalAbsPFMDatas(:,1:result.size.rep,i,j) = Data(:,2*(2*(result.size.rep+1)+1)+2:2:2*(3*(result.size.rep+1)))-expPara(7)*1e-3;
-        TotalFlDatas(:,1:result.size.rep,i,j) = lowpass(Data(:,2*((result.size.rep+1)+1)+2:2:2*(2*(result.size.rep+1))),50e-4/(result.dt*1e-6), 1/(result.dt*1e-6)); % LPF 2 kHz
+        TotalAbsPFMDatas(:,1:result.size.rep,i,j) = Data(:,2*(2*(result.size.rep+1)+1)+2:2:2*(3*(result.size.rep+1)))-expPara(8)*1e-3;
+        TotalFlDatas(:,1:result.size.rep,i,j) = Data(:,2*((result.size.rep+1)+1)+2:2:2*(2*(result.size.rep+1)));
+        % TotalFlDatas(:,1:result.size.rep,i,j) = lowpass(Data(:,2*((result.size.rep+1)+1)+2:2:2*(2*(result.size.rep+1))),50e-4/(result.dt*1e-6), 1/(result.dt*1e-6)); % LPF 2 kHz
     end
 end
 
@@ -152,8 +149,8 @@ result.fl.tt = TimeTraceMean_v1(result, 'fl');
 
 %% summing up the time trace data
 
-result.abs.sum = TimeTraceSum_v1(result,'abs',result.sumtime.start, result.sumtime.end);
-result.fl.sum = TimeTraceSum_v1(result,'fl',result.sumtime.start, result.sumtime.end);
+result.abs.sum = TimeTraceSum_v1(result,'abs', result.abs.sumendtime);
+result.fl.sum = TimeTraceSum_v1(result,'fl', result.fl.sumendtime);
 
 %% Making spectrum data
 
@@ -233,5 +230,7 @@ end
 
 % load Handel
 % sound(y,1.3*Fs)
+
+% save('DataFile'+result.name+'.m',"-v7.3");
 
 end

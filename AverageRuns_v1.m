@@ -7,6 +7,8 @@ result.freq = data(runs(1)).freq;
 result.det = data(runs(1)).det;
 result.t = data(runs(1)).t;
 result.beamaxis = data(runs(1)).beamaxis;
+result.abs.sumendtime = data(runs(1)).abs.sumendtime;
+result.fl.sumendtime = data(runs(1)).fl.sumendtime;
 
 
 % abs data processing
@@ -25,7 +27,7 @@ end
 [result.size.time result.size.rep result.size.iter result.size.freq]=size(result.abs.norm);
 
 result.abs.tt = TimeTraceMean_v1(result,'abs');
-result.abs.sum = TimeTraceSum_v1(result, 'abs', 0.08, result.t(end)*1e-3);
+result.abs.sum = TimeTraceSum_v1(result, 'abs', result.abs.sumendtime);
 
 result.abs.mean = squeeze(mean(result.abs.sum,[2 3])); % results.repititionPerStep, results.iteration 전부 평균
 result.abs.ste = std(result.abs.sum,0,[2 3])/sqrt(result.size.iter*result.size.rep);
@@ -44,7 +46,7 @@ end
 
 
 result.fl.tt = TimeTraceMean_v1(result,'fl');
-result.fl.sum = TimeTraceSum_v1(result, 'fl', 0.08, result.t(end)*1e-3);
+result.fl.sum = TimeTraceSum_v1(result, 'fl', result.fl.sumendtime);
 
 result.fl.mean = squeeze(mean(result.fl.sum,[2 3])); % results.repititionPerStep, results.iteration 전부 평균
 result.fl.ste = std(result.fl.sum,0,[2 3])/sqrt(result.size.iter*result.size.rep);
