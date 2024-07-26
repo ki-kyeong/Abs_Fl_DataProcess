@@ -1,6 +1,8 @@
-function result = readMgFSpecData_v9(name, plotmode)
+function result = readMgFSpecData_v11(name, plotmode)
 
-% rep의 첫번째 데이터는 버리도록 수정 24/03/18
+% rep의 첫번째 데이터는 버리도록 수정 24/03/18 -> 취소
+% UV wavelength만 읽기 시기시작 24/04/30 -> 취소
+% UV wavelength읽는거 취소~ / data excel file에서 time column들을 없앴음 24/5/14
 
 clf;
 close all;
@@ -51,7 +53,7 @@ end
 
 %===========================
 result.size.iter = result.iteration;
-result.size.rep = result.repititionPerStep-1;
+result.size.rep = result.repititionPerStep;
 
 %======================================
 % read each iteration wavemeter data
@@ -95,6 +97,8 @@ result = detcal_v1(result);
 % read data for initializing
 
 DataParams = detectImportOptions(name+'0_'+num2str(result.freq.IR.cavity(1),'%.6f')+".csv");
+DataParams.DataLines = [3 Inf];
+DataParams.VariableUnitsLine = 2;
 Data = readmatrix(name+'0_'+num2str(result.freq.IR.cavity(1),'%.6f')+".csv",DataParams);
 
 result.dt = (Data(2,1)-Data(1,1))*1e6; % µs unit
@@ -121,9 +125,9 @@ for j = 1 : result.size.freq
 
     for i = 1:result.size.iter
         Data = readmatrix(name+string(i-1)+"_"+num2str(f,'%.6f')+".csv",DataParams);
-        TotalAbsDatas(:,1:result.size.rep,i,j) = Data(:,4:2:2*(result.size.rep+1))-expPara(7)*1e-3;
-        TotalAbsPFMDatas(:,1:result.size.rep,i,j) = Data(:,2*(2*(result.size.rep+1)+1)+2:2:2*(3*(result.size.rep+1)))-expPara(8)*1e-3;
-        TotalFlDatas(:,1:result.size.rep,i,j) = Data(:,2*((result.size.rep+1)+1)+2:2:2*(2*(result.size.rep+1)));
+        TotalAbsDatas(:,1:result.size.rep,i,j) = Data(:,2:2+result.size.rep-1)-expPara(7)*1e-3;
+        TotalFlDatas(:,1:result.size.rep,i,j) = Data(:,2+result.size.rep:2+2*result.size.rep-1);
+        TotalAbsPFMDatas(:,1:result.size.rep,i,j) = Data(:,2+2*result.size.rep:end)-expPara(8)*1e-3;
         % TotalFlDatas(:,1:result.size.rep,i,j) = lowpass(Data(:,2*((result.size.rep+1)+1)+2:2:2*(2*(result.size.rep+1))),50e-4/(result.dt*1e-6), 1/(result.dt*1e-6)); % LPF 2 kHz
     end
 end

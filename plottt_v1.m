@@ -1,7 +1,10 @@
 function result = plottt_v1(ax, data, mode, freqidx )
-set(groot, 'defaultLineLineWidth',1.5)
+
 set(groot, 'defaultAxesFontSize',18)
-set(groot, 'defaultAxesLineWidth',1)
+set(groot, 'defaultLineLineWidth',1)
+set(groot, 'defaultAxesFontSize',18)
+set(groot, 'defaultAxesLineWidth',1.5)
+set(groot, 'defaultAxesBox','on')
 pbaspect([1.5,1,1])
 
 switch mode
