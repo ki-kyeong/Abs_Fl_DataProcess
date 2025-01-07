@@ -21,30 +21,34 @@ function results = EOMfit_v1(x,y,fm,n,sps)
 %    -> 이 때는 함수에서 sps를 없애고 아래에서 직접 설정해야 합니다.
 
 my_EOM_fit_function = "((amp*Gamma^2/((x-x0)^2+Gamma^2))*(besselj(0,beta)^2)) + offset";
+my_EOM_fit_function2 = "((amp2*Gamma^2/((x-x0)^2+Gamma^2))*(besselj(0,beta2)^2)) + offset";
 
 for i = 1:n
     fitf_i = "((amp*Gamma^2)/((x-x0-"+num2str(i*fm)+")^2+Gamma^2)+(amp*Gamma^2)/((x-x0+"+num2str(i*fm)+")^2+(Gamma^2)))*(besselj("+num2str(i)+",beta)^2)";
-    my_EOM_fit_function = my_EOM_fit_function + " + " + fitf_i;
+    fitf_i2 = "((amp2*Gamma^2)/((x-x0-"+num2str(i*fm)+")^2+Gamma^2)+(amp2*Gamma^2)/((x-x0+"+num2str(i*fm)+")^2+(Gamma^2)))*(besselj("+num2str(i)+",beta2)^2)";
+    my_EOM_fit_function = my_EOM_fit_function + " + " + fitf_i+ "+"+fitf_i2;
 end
 
 results.model=my_EOM_fit_function;
 
 myfittype = fittype(my_EOM_fit_function,...
         'dependent','y','independent',{'x'},...
-        'coefficients',{'amp','Gamma','x0','beta','offset'});
+        'coefficients',{'amp','Gamma','x0','beta','offset','amp2','beta2'});
 
 
 [f,gof] = fit(x,y,myfittype,...
     'startpoint',sps,...[amp, Gamma, x0, beta, DCoffset],...
-    'lower',[0 0 -Inf 0 -Inf],'upper',[Inf 10 Inf Inf Inf]);
+    'lower',[0 0 -Inf 0 -Inf 0 0],'upper',[Inf 10 Inf Inf Inf Inf Inf]);
 
 eom_fit = figure(1)
+
 plot(f,x,y)
 
-title("EOM fitting results, \beta = " + num2str(f.beta) + " rad")
+title("EOM fitting results,amp="+num2str(f.amp)+" \beta = " + num2str(f.beta) + " rad, amp2 ="+num2str(f.amp2)+", \beta_2= "+num2str(f.beta2))
 xlabel("Frequency (MHz)")
 ylabel("Cavity transmission signal (V)")
 grid on
+
 
 results.amp = f.amp;
 results.Gamma = f.Gamma;

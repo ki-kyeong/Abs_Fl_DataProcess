@@ -5,7 +5,8 @@ c = 299792458; % speed of light, m/s
 amu = 1.66053906660*1e-27; % atomic mass unit, kg
 hfs = [-129.5 -120.3 0 109.7]; % hyperfine strunture detuning from F=0, [2 1+ 0 1-]
 
-[xData, yData] = prepareCurveData( data.det.wm.mean.Q, data.abs.mean);
+[xData, yData] = prepareCurveData( data.det.UV.mean(:,2,2), data.data.abs.mean);
+% [xData, yData] = prepareCurveData( data.det.wm.mean.Q, data.abs.mean);
 
 % Set up fittype and options.
 % ft = fittype( 'a1/c1/sqrt(pi)*exp(-((x-b1+129.5)/c1)^2)+a2/c1/sqrt(pi)*exp(-((x-b1+120.3)/c1)^2)+a3/c1/sqrt(pi)*exp(-((x-b1)/c1)^2)+a4/c1/sqrt(pi)*exp(-((x-b1-109.7)/c1)^2)+d1', 'independent', 'x', 'dependent', 'y' );
@@ -64,7 +65,8 @@ plot(xData, fitresult.a4/fitresult.c1/sqrt(pi)*exp(-((xData-fitresult.b1-hfs(4))
 legend( 'data', "G fit : T="+num2str(T, 2)+" K",'a1/a3 = '+string(fitresult.a1/fitresult.a3),'$\Delta$ = '+string(fitresult.b1)+' MHz','a4/a3 = '+string(fitresult.a4/fitresult.a3),...
     'Location', 'best', 'Interpreter', 'Latex' );
 
-saveas(gcf, "./K_results/"+data.savename+"_GF.fig");
-saveas(gcf, "./K_results/"+data.savename+"_GF.png");
+SaveFigToFile_v2(gcf, "K_results", data.runnum+"_abs_GF")
+% saveas(gcf, "./K_results/"+data.savename+"_GF.fig");
+% saveas(gcf, "./K_results/"+data.savename+"_GF.png");
 
 end
